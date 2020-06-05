@@ -7,6 +7,7 @@ import 'package:inherited_state_example/counter.dart';
 import 'package:inherited_state_example/counter_service.dart';
 
 void main() {
+  // todo: fix git.
   runApp(MyApp());
 }
 
