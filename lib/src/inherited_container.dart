@@ -3,31 +3,52 @@ import 'package:flutter/material.dart';
 import 'inject.dart';
 import 'state_controller.dart';
 
+class SC {
+  static StateController<T> get<T>({BuildContext context}) =>
+      StateContainer.get(context: context);
+}
+
+class DC {
+  static T get<T>() => DependencyContainer.get();
+}
+
+class DependencyContainer {
+  static T get<T>() {
+    final inject = InheritedContainer.getDependency<T>();
+    return inject.singleton;
+  }
+}
+
+class StateContainer {
+  static StateController<T> get<T>({BuildContext context}) {
+    final inject = InheritedContainer.getStateInject<T>();
+    if (context != null) inject.staticOf(context);
+    return inject.stateSingleton;
+  }
+}
+
 class InheritedContainer extends StatefulWidget {
   const InheritedContainer({
     Key key,
     @required this.inject,
+    @required this.dependencies,
     @required this.builder,
   })  : assert(inject != null),
         assert(builder != null),
         super(key: key);
 
   final List<Injectable> inject;
+  final List<Injectable> dependencies;
   final Widget Function(BuildContext) builder;
 
-  static T get<T>() {
-    final inject = _getInject<T>();
-    return inject.singleton;
+  static Inject<T> getStateInject<T>() {
+    return InheritedContainerState.allRegisteredStateModelInApp['$T']?.last
+        as Inject<T>;
   }
 
-  static StateController<T> getController<T>({BuildContext context}) {
-    final inject = _getInject<T>();
-    if (context != null) inject.staticOf(context);
-    return inject.stateSingleton;
-  }
-
-  static Inject<T> _getInject<T>() {
-    return InheritedContainerState.allRegisteredModelInApp['$T']?.last as Inject<T>;
+  static Inject<T> getDependency<T>() {
+    return InheritedContainerState.allRegisteredModelInApp['$T']?.last
+        as Inject<T>;
   }
 
   @override
@@ -35,9 +56,12 @@ class InheritedContainer extends StatefulWidget {
 }
 
 class InheritedContainerState extends State<InheritedContainer> {
+  static final Map<String, List<Injectable<dynamic>>>
+      allRegisteredStateModelInApp = <String, List<Injectable<dynamic>>>{};
   static final Map<String, List<Injectable<dynamic>>> allRegisteredModelInApp =
       <String, List<Injectable<dynamic>>>{};
   final _injects = <Injectable>[];
+  final _dependencies = <Injectable>[];
 
   @override
   void initState() {
@@ -46,13 +70,26 @@ class InheritedContainerState extends State<InheritedContainer> {
       _injects.addAll(widget.inject);
     }
 
+    if (widget.dependencies != null) {
+      _dependencies.addAll(widget.dependencies);
+    }
+
     for (final inject in _injects) {
       assert(inject != null);
       final name = inject.name;
-      if (allRegisteredModelInApp[name] == null) {
-        allRegisteredModelInApp[name] = [inject];
+      if (allRegisteredStateModelInApp[name] == null) {
+        allRegisteredStateModelInApp[name] = [inject];
       } else {
-        allRegisteredModelInApp[name].add(inject);
+        allRegisteredStateModelInApp[name].add(inject);
+      }
+    }
+    for (final dependency in _dependencies) {
+      assert(dependency != null);
+      final name = dependency.name;
+      if (allRegisteredModelInApp[name] == null) {
+        allRegisteredModelInApp[name] = [dependency];
+      } else {
+        allRegisteredModelInApp[name].add(dependency);
       }
     }
   }
@@ -61,12 +98,28 @@ class InheritedContainerState extends State<InheritedContainer> {
   void dispose() {
     for (final inject in _injects) {
       final name = inject.name;
-      allRegisteredModelInApp[name]?.remove(inject);
+      allRegisteredStateModelInApp[name]?.remove(inject);
+      if (allRegisteredStateModelInApp[name].isEmpty) {
+        allRegisteredStateModelInApp.remove(name);
+
+        try {
+          (inject.singleton as dynamic)?.dispose();
+        } catch (e) {
+          if (e is! NoSuchMethodError) {
+            rethrow;
+          }
+        }
+      }
+    }
+
+    for (final dependency in _dependencies) {
+      final name = dependency.name;
+      allRegisteredModelInApp[name]?.remove(dependency);
       if (allRegisteredModelInApp[name].isEmpty) {
         allRegisteredModelInApp.remove(name);
 
         try {
-          (inject.singleton as dynamic)?.dispose();
+          (dependency.singleton as dynamic)?.dispose();
         } catch (e) {
           if (e is! NoSuchMethodError) {
             rethrow;

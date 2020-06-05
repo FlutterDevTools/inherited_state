@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:inherited_state/inherited_state.dart';
+import 'package:inherited_state_example/app_config.dart';
 
 import 'package:inherited_state_example/counter.dart';
+import 'package:inherited_state_example/counter_service.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,36 +13,59 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InheritedContainer(
-      inject: [Inject<Counter>(() => Counter())],
-      builder: (_) => MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: const MyHomePage(title: 'Flutter Demo Home Page'),
-      ),
-    );
+        inject: [
+          Inject<Counter>(() => Counter(0)),
+        ],
+        dependencies: [
+          Inject<AppConfig>(
+              () => const AppConfig(appName: 'Inherited State Example')),
+          Inject<CounterService>(() => CounterService()),
+        ],
+        builder: (_) {
+          final appConfig = DC.get<AppConfig>();
+          return MaterialApp(
+            title: appConfig.appName,
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              visualDensity: VisualDensity.adaptivePlatformDensity,
+            ),
+            home: MyHomePage(title: appConfig.appName),
+          );
+        });
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final counterService = DC.get<CounterService>();
+  Future<int> initialCounterFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    initialCounterFuture = counterService.getInitialCounter();
+    initialCounterFuture.then((value) =>
+        SC.get<Counter>().setState((counter) => counter.count = value));
+  }
+
   void _incrementCounter() {
-    InheritedContainer.getController<Counter>()
-        .setState((counter) => counter.count++);
+    SC.get<Counter>().setState((counter) => counter.count++);
   }
 
   @override
   Widget build(BuildContext context) {
-    final counter =
-        InheritedContainer.getController<Counter>(context: context).state;
+    final counter = SC.get<Counter>(context: context).state;
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
       ),
       body: Center(
         child: Column(
@@ -49,17 +74,27 @@ class MyHomePage extends StatelessWidget {
             const Text(
               'You have pushed the button this many times:',
             ),
-            Text(
-              '${counter.count}',
-              style: Theme.of(context).textTheme.headline4,
+            FutureBuilder<int>(
+              future: initialCounterFuture,
+              builder: (_, snapshot) => snapshot.hasData
+                  ? Text(
+                      '${counter.count}',
+                      style: Theme.of(context).textTheme.headline4,
+                    )
+                  : const CircularProgressIndicator(),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      floatingActionButton: FutureBuilder<int>(
+        future: initialCounterFuture,
+        builder: (_, snapshot) => FloatingActionButton(
+          backgroundColor: snapshot.hasData ? null : Colors.grey,
+          disabledElevation: 0,
+          onPressed: snapshot.hasData ? _incrementCounter : null,
+          tooltip: 'Increment',
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
