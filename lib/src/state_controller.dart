@@ -9,5 +9,5 @@ class StateController<T> {
 
   T get state => _inject.singleton;
 
-  void setState(VoidCallback stateUpdateFn) {}
+  void setState(void Function(T) stateUpdateFn) {}
 }

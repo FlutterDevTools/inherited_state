@@ -4,7 +4,7 @@ import 'inject.dart';
 import 'state_controller.dart';
 
 class Injector extends StatefulWidget {
-  const Injector.intenal({
+  const Injector({
     Key key,
     @required this.inject,
     @required this.builder,
