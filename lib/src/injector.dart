@@ -35,8 +35,8 @@ class Injector extends StatefulWidget {
 }
 
 class InjectorState extends State<Injector> {
-  static final Map<String, List<Inject<dynamic>>> allRegisteredModelInApp =
-      <String, List<Inject<dynamic>>>{};
+  static final Map<String, List<Injectable<dynamic>>> allRegisteredModelInApp =
+      <String, List<Injectable<dynamic>>>{};
   List<Injectable> _injects = [];
 
   @override
@@ -79,14 +79,14 @@ class InjectorState extends State<Injector> {
 
   @override
   Widget build(BuildContext context) {
-    var _nestedInject = Builder(
+    Widget _nestedInject = Builder(
       builder: (BuildContext context) {
         return widget.builder(context);
       },
     );
 
     if (_injects.isNotEmpty) {
-      for (Inject<dynamic> inject in _injects.reversed) {
+      for (final inject in _injects.reversed) {
         _nestedInject = inject.inheritedInject(_nestedInject);
       }
     }

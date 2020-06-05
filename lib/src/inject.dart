@@ -36,7 +36,7 @@ class Inject<T> implements Injectable<T> {
 
   @override
   Widget inheritedInject(Widget child) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<T>(
       valueListenable: _notifier,
       child: child,
       builder: (ctx, _, child) {

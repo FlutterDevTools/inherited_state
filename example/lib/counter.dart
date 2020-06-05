@@ -1,3 +1,3 @@
 class Counter {
-  int count;
+  int count = 0;
 }
