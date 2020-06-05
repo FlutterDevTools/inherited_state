@@ -6,7 +6,7 @@ import 'package:inherited_state_example/counter.dart';
 import 'package:inherited_state_example/counter_service.dart';
 
 void main() {
-  runApp(MyApp( ));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
