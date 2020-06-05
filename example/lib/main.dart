@@ -10,7 +10,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Injector(
+    return InheritedContainer(
       inject: [Inject<Counter>(() => Counter())],
       builder: (_) => MaterialApp(
         title: 'Flutter Demo',
@@ -18,25 +18,26 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: MyHomePage(title: 'Flutter Demo Home Page'),
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
     );
   }
 }
 
 class MyHomePage extends StatelessWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   void _incrementCounter() {
-    Injector.getWithController<Counter>()
+    InheritedContainer.getController<Counter>()
         .setState((counter) => counter.count++);
   }
 
   @override
   Widget build(BuildContext context) {
-    final counter = Injector.getWithController<Counter>(context: context).state;
+    final counter =
+        InheritedContainer.getController<Counter>(context: context).state;
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -45,7 +46,7 @@ class MyHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
+            const Text(
               'You have pushed the button this many times:',
             ),
             Text(
@@ -58,7 +59,7 @@ class MyHomePage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

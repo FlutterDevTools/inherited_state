@@ -1,13 +1,15 @@
-import 'package:flutter/widgets.dart';
 
 import 'inject.dart';
 
 class StateController<T> {
-  const StateController(this._inject);
+  StateController(this._inject) : super();
 
-  final Inject<T> _inject;
+  final Injectable<T> _inject;
 
   T get state => _inject.singleton;
 
-  void setState(void Function(T) stateUpdateFn) {}
+  void setState(void Function(T) stateUpdateFn) {
+    stateUpdateFn(state);
+    _inject.notifier.value = state;
+  }
 }

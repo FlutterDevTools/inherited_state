@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'inject.dart';
 import 'state_controller.dart';
 
-class Injector extends StatefulWidget {
-  const Injector({
+class InheritedContainer extends StatefulWidget {
+  const InheritedContainer({
     Key key,
     @required this.inject,
     @required this.builder,
@@ -20,24 +20,24 @@ class Injector extends StatefulWidget {
     return inject.singleton;
   }
 
-  static StateController<T> getWithController<T>({BuildContext context}) {
+  static StateController<T> getController<T>({BuildContext context}) {
     final inject = _getInject<T>();
     if (context != null) inject.staticOf(context);
     return inject.stateSingleton;
   }
 
   static Inject<T> _getInject<T>() {
-    return InjectorState.allRegisteredModelInApp['$T']?.last as Inject<T>;
+    return InheritedContainerState.allRegisteredModelInApp['$T']?.last as Inject<T>;
   }
 
   @override
-  State<Injector> createState() => InjectorState();
+  State<InheritedContainer> createState() => InheritedContainerState();
 }
 
-class InjectorState extends State<Injector> {
+class InheritedContainerState extends State<InheritedContainer> {
   static final Map<String, List<Injectable<dynamic>>> allRegisteredModelInApp =
       <String, List<Injectable<dynamic>>>{};
-  List<Injectable> _injects = [];
+  final _injects = <Injectable>[];
 
   @override
   void initState() {

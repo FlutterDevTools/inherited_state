@@ -1,8 +1,6 @@
 name: inherited_state
 description: Simple state management using Inherited Widgets and DI
 version: 0.0.1
-author:
-homepage:
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
