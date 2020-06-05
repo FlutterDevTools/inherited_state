@@ -1,54 +1,50 @@
 import 'package:flutter/material.dart';
 
 import 'inject.dart';
-import 'state_controller.dart';
+import 'reactive_controller.dart';
 
-class SC {
-  static StateController<T> get<T>({BuildContext context}) =>
-      StateContainer.get(context: context);
+class RS {
+  static ReactiveController<T> get<T>({BuildContext context}) =>
+      ReactiveState.get(context: context);
 }
 
-class DC {
-  static T get<T>() => DependencyContainer.get();
+class IS {
+  static T get<T>() => ImmutableState.get();
 }
 
-class DependencyContainer {
-  static T get<T>() {
-    final inject = InheritedContainer.getDependency<T>();
-    return inject.singleton;
-  }
+class ImmutableState {
+  static T get<T>() => InheritedContainer.getImmutableState<T>().singleton;
 }
 
-class StateContainer {
-  static StateController<T> get<T>({BuildContext context}) {
-    final inject = InheritedContainer.getStateInject<T>();
-    if (context != null) inject.staticOf(context);
-    return inject.stateSingleton;
+class ReactiveState {
+  static ReactiveController<T> get<T>({BuildContext context}) {
+    final state = InheritedContainer.getReactiveState<T>();
+    if (context != null) state.staticOf(context);
+    return state.stateSingleton;
   }
 }
 
 class InheritedContainer extends StatefulWidget {
   const InheritedContainer({
     Key key,
-    @required this.inject,
-    @required this.dependencies,
+    @required this.reactives,
+    @required this.immutables,
     @required this.builder,
-  })  : assert(inject != null),
+  })  : assert(reactives != null),
+        assert(immutables != null),
         assert(builder != null),
         super(key: key);
 
-  final List<Injectable> inject;
-  final List<Injectable> dependencies;
+  final List<Injectable> reactives;
+  final List<Injectable> immutables;
   final Widget Function(BuildContext) builder;
 
-  static Inject<T> getStateInject<T>() {
-    return InheritedContainerState.allRegisteredStateModelInApp['$T']?.last
-        as Inject<T>;
+  static Inject<T> getReactiveState<T>() {
+    return InheritedContainerState.reactiveSates['$T']?.last as Inject<T>;
   }
 
-  static Inject<T> getDependency<T>() {
-    return InheritedContainerState.allRegisteredModelInApp['$T']?.last
-        as Inject<T>;
+  static Inject<T> getImmutableState<T>() {
+    return InheritedContainerState.immutableStates['$T']?.last as Inject<T>;
   }
 
   @override
@@ -56,54 +52,54 @@ class InheritedContainer extends StatefulWidget {
 }
 
 class InheritedContainerState extends State<InheritedContainer> {
-  static final Map<String, List<Injectable<dynamic>>>
-      allRegisteredStateModelInApp = <String, List<Injectable<dynamic>>>{};
-  static final Map<String, List<Injectable<dynamic>>> allRegisteredModelInApp =
+  static final Map<String, List<Injectable<dynamic>>> reactiveSates =
       <String, List<Injectable<dynamic>>>{};
-  final _injects = <Injectable>[];
-  final _dependencies = <Injectable>[];
+  static final Map<String, List<Injectable<dynamic>>> immutableStates =
+      <String, List<Injectable<dynamic>>>{};
+  final _reactives = <Injectable>[];
+  final _immutables = <Injectable>[];
 
   @override
   void initState() {
     super.initState();
-    if (widget.inject != null) {
-      _injects.addAll(widget.inject);
+    if (widget.reactives != null) {
+      _reactives.addAll(widget.reactives);
     }
 
-    if (widget.dependencies != null) {
-      _dependencies.addAll(widget.dependencies);
+    if (widget.immutables != null) {
+      _immutables.addAll(widget.immutables);
     }
 
-    for (final inject in _injects) {
-      assert(inject != null);
-      final name = inject.name;
-      if (allRegisteredStateModelInApp[name] == null) {
-        allRegisteredStateModelInApp[name] = [inject];
+    for (final state in _reactives) {
+      assert(state != null);
+      final name = state.name;
+      if (reactiveSates[name] == null) {
+        reactiveSates[name] = [state];
       } else {
-        allRegisteredStateModelInApp[name].add(inject);
+        reactiveSates[name].add(state);
       }
     }
-    for (final dependency in _dependencies) {
+    for (final dependency in _immutables) {
       assert(dependency != null);
       final name = dependency.name;
-      if (allRegisteredModelInApp[name] == null) {
-        allRegisteredModelInApp[name] = [dependency];
+      if (immutableStates[name] == null) {
+        immutableStates[name] = [dependency];
       } else {
-        allRegisteredModelInApp[name].add(dependency);
+        immutableStates[name].add(dependency);
       }
     }
   }
 
   @override
   void dispose() {
-    for (final inject in _injects) {
-      final name = inject.name;
-      allRegisteredStateModelInApp[name]?.remove(inject);
-      if (allRegisteredStateModelInApp[name].isEmpty) {
-        allRegisteredStateModelInApp.remove(name);
+    for (final state in _reactives) {
+      final name = state.name;
+      reactiveSates[name]?.remove(state);
+      if (reactiveSates[name].isEmpty) {
+        reactiveSates.remove(name);
 
         try {
-          (inject.singleton as dynamic)?.dispose();
+          (state.singleton as dynamic)?.dispose();
         } catch (e) {
           if (e is! NoSuchMethodError) {
             rethrow;
@@ -112,11 +108,11 @@ class InheritedContainerState extends State<InheritedContainer> {
       }
     }
 
-    for (final dependency in _dependencies) {
+    for (final dependency in _immutables) {
       final name = dependency.name;
-      allRegisteredModelInApp[name]?.remove(dependency);
-      if (allRegisteredModelInApp[name].isEmpty) {
-        allRegisteredModelInApp.remove(name);
+      immutableStates[name]?.remove(dependency);
+      if (immutableStates[name].isEmpty) {
+        immutableStates.remove(name);
 
         try {
           (dependency.singleton as dynamic)?.dispose();
@@ -132,17 +128,17 @@ class InheritedContainerState extends State<InheritedContainer> {
 
   @override
   Widget build(BuildContext context) {
-    Widget _nestedInject = Builder(
+    Widget _nestedState = Builder(
       builder: (BuildContext context) {
         return widget.builder(context);
       },
     );
 
-    if (_injects.isNotEmpty) {
-      for (final inject in _injects.reversed) {
-        _nestedInject = inject.inheritedInject(_nestedInject);
+    if (_reactives.isNotEmpty) {
+      for (final state in _reactives.reversed) {
+        _nestedState = state.inheritedInject(_nestedState);
       }
     }
-    return _nestedInject;
+    return _nestedState;
   }
 }

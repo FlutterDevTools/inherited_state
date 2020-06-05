@@ -1,5 +1,5 @@
 name: inherited_state
-description: Simple state management using Inherited Widgets and DI
+description: Simple state management (using InheritedWidget) and DI
 version: 0.0.1
 
 environment:

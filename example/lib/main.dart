@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inherited_state/inherited_state.dart';
+import 'package:inherited_state_example/api_service.dart';
 import 'package:inherited_state_example/app_config.dart';
 
 import 'package:inherited_state_example/counter.dart';
@@ -13,16 +14,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InheritedContainer(
-        inject: [
+        reactives: [
           Inject<Counter>(() => Counter(0)),
         ],
-        dependencies: [
+        immutables: [
           Inject<AppConfig>(
               () => const AppConfig(appName: 'Inherited State Example')),
-          Inject<CounterService>(() => CounterService()),
+          Inject<ApiService>(() => ApiService(IS.get())),
+          Inject<CounterService>(() => CounterService(IS.get())),
         ],
         builder: (_) {
-          final appConfig = DC.get<AppConfig>();
+          final appConfig = IS.get<AppConfig>();
           return MaterialApp(
             title: appConfig.appName,
             theme: ThemeData(
@@ -45,7 +47,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final counterService = DC.get<CounterService>();
+  final counterService = IS.get<CounterService>();
   Future<int> initialCounterFuture;
 
   @override
@@ -53,16 +55,16 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     initialCounterFuture = counterService.getInitialCounter();
     initialCounterFuture.then((value) =>
-        SC.get<Counter>().setState((counter) => counter.count = value));
+        RS.get<Counter>().setState((counter) => counter.count = value));
   }
 
   void _incrementCounter() {
-    SC.get<Counter>().setState((counter) => counter.count++);
+    RS.get<Counter>().setState((counter) => counter.count++);
   }
 
   @override
   Widget build(BuildContext context) {
-    final counter = SC.get<Counter>(context: context).state;
+    final counter = RS.get<Counter>(context: context).state;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),

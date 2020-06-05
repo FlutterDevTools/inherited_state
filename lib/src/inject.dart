@@ -2,43 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:inherited_state/src/inject_notifier.dart';
 
 import 'inherited_inject.dart';
-import 'state_controller.dart';
+import 'reactive_controller.dart';
 
 abstract class Injectable<T> {
-  ///wrap with InheritedWidget
   Widget inheritedInject(Widget child);
   String get name;
   T get singleton;
   InjectNotifier<T> get notifier;
-  StateController<T> get stateSingleton;
+  ReactiveController<T> get stateSingleton;
 }
 
 class Inject<T> implements Injectable<T> {
-  factory Inject(T Function() creationFunction) {
-    final val = creationFunction();
-    return Inject._internal(val, InjectNotifier<T>(val));
-  }
+  Inject(this._creationFunction);
 
-  Inject._internal(this._singleton, this._notifier);
+  final T Function() _creationFunction;
 
   @override
   String get name => '$T';
 
-  final InjectNotifier<T> _notifier;
+  final InjectNotifier<T> _notifier = InjectNotifier<T>(null);
   @override
   InjectNotifier<T> get notifier => _notifier;
 
-  final T _singleton;
+  T _singleton;
 
-  /// state singleton
-  StateController<T> _stateSingleton;
-
-  @override
-  T get singleton => _singleton;
+  ReactiveController<T> _stateSingleton;
 
   @override
-  StateController<T> get stateSingleton {
-    _stateSingleton ??= StateController<T>(this);
+  T get singleton {
+    _singleton ??= _creationFunction();
+    return _singleton;
+  }
+
+  @override
+  ReactiveController<T> get stateSingleton {
+    _stateSingleton ??= ReactiveController<T>(this);
     return _stateSingleton;
   }
 
@@ -49,7 +47,6 @@ class Inject<T> implements Injectable<T> {
       builder: (ctx, _, __) {
         return InheritedInject<T>(
           child: child,
-          getSingleton: () => stateSingleton,
         );
       },
     );

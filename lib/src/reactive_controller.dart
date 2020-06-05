@@ -1,8 +1,8 @@
 
 import 'inject.dart';
 
-class StateController<T> {
-  StateController(this._inject) : super();
+class ReactiveController<T> {
+  ReactiveController(this._inject) : super();
 
   final Injectable<T> _inject;
 

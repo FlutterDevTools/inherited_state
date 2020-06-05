@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Flutter Get Packages",
+            "type": "shell",
+            "command": "flutter pub get",
+            "problemMatcher": [
+                "$dart-pub-build_runner"
+            ],
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "isBackground": true
+        },
+    ]
+}
