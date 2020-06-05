@@ -1,7 +1,5 @@
 library inherited_state;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'src/inject.dart' show Inject;
+export 'src/injector.dart' show Injector;
+export 'src/state_controller.dart' show StateController;
