@@ -56,7 +56,7 @@ Widget build(BuildContext context) {
 final counterService = IS.get<CounterService>();
 ```
 
-## Full Example with Stateful and Plain
+## Full Example with Reactive and Immutable
 
 <details>
   <summary>main.yaml</summary>

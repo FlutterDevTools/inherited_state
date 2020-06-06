@@ -18,7 +18,9 @@ class Inject<T> implements Injectable<T> {
   final T Function() _creationFunction;
 
   @override
-  String get name => '$T';
+  String get name => getName<T>();
+
+  static String getName<T>() => '$T';
 
   final InjectNotifier<T> _notifier = InjectNotifier<T>(null);
   @override

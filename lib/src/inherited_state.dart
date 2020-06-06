@@ -40,11 +40,13 @@ class InheritedState extends StatefulWidget {
   final Widget Function(BuildContext) builder;
 
   static Inject<T> getReactiveState<T>() {
-    return _InheritedState.reactiveSates['$T']?.last as Inject<T>;
+    return _InheritedState.reactiveSates[Inject.getName<T>()]?.last
+        as Inject<T>;
   }
 
   static Inject<T> getImmutableState<T>() {
-    return _InheritedState.immutableStates['$T']?.last as Inject<T>;
+    return _InheritedState.immutableStates[Inject.getName<T>()]?.last
+        as Inject<T>;
   }
 
   @override
@@ -62,41 +64,42 @@ class _InheritedState extends State<InheritedState> {
   @override
   void initState() {
     super.initState();
-    if (widget.reactives != null) {
-      _reactives.addAll(widget.reactives);
+    _initStates(widget.reactives, _reactives, reactiveSates);
+    _initStates(widget.immutables, _immutables, immutableStates);
+  }
+
+  static void _initStates(List<Injectable> widgetStates,
+      List<Injectable> localStates, Map<String, List<Injectable>> allStates) {
+    if (widgetStates != null) {
+      localStates.addAll(widgetStates);
     }
 
-    if (widget.immutables != null) {
-      _immutables.addAll(widget.immutables);
-    }
-
-    for (final state in _reactives) {
+    localStates.forEach((state) {
       assert(state != null);
       final name = state.name;
-      if (reactiveSates[name] == null) {
-        reactiveSates[name] = [state];
+      if (allStates[name] == null) {
+        allStates[name] = [state];
       } else {
-        reactiveSates[name].add(state);
+        allStates[name].add(state);
       }
-    }
-    for (final dependency in _immutables) {
-      assert(dependency != null);
-      final name = dependency.name;
-      if (immutableStates[name] == null) {
-        immutableStates[name] = [dependency];
-      } else {
-        immutableStates[name].add(dependency);
-      }
-    }
+    });
   }
 
   @override
   void dispose() {
-    for (final state in _reactives) {
+    _disposeStates(_reactives, reactiveSates);
+    _disposeStates(_immutables, immutableStates);
+
+    super.dispose();
+  }
+
+  static void _disposeStates(
+      List<Injectable> states, Map<String, List<Injectable>> allStates) {
+    states.forEach((state) {
       final name = state.name;
-      reactiveSates[name]?.remove(state);
-      if (reactiveSates[name].isEmpty) {
-        reactiveSates.remove(name);
+      allStates[name]?.remove(state);
+      if (allStates[name].isEmpty) {
+        allStates.remove(name);
 
         try {
           (state.singleton as dynamic)?.dispose();
@@ -106,39 +109,20 @@ class _InheritedState extends State<InheritedState> {
           }
         }
       }
-    }
-
-    for (final dependency in _immutables) {
-      final name = dependency.name;
-      immutableStates[name]?.remove(dependency);
-      if (immutableStates[name].isEmpty) {
-        immutableStates.remove(name);
-
-        try {
-          (dependency.singleton as dynamic)?.dispose();
-        } catch (e) {
-          if (e is! NoSuchMethodError) {
-            rethrow;
-          }
-        }
-      }
-    }
-    super.dispose();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget _nestedState = Builder(
+    final Widget child = Builder(
       builder: (BuildContext context) {
         return widget.builder(context);
       },
     );
 
-    if (_reactives.isNotEmpty) {
-      for (final state in _reactives.reversed) {
-        _nestedState = state.inheritedInject(_nestedState);
-      }
-    }
-    return _nestedState;
+    return _reactives.reversed.fold(
+      child,
+      (child, inject) => inject.inheritedInject(child),
+    );
   }
 }
