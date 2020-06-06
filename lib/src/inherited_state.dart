@@ -98,7 +98,7 @@ class _InheritedState extends State<InheritedState> {
     states.forEach((state) {
       final name = state.name;
       allStates[name]?.remove(state);
-      if (allStates[name].isEmpty) {
+      if (allStates[name]?.isEmpty ?? false) {
         allStates.remove(name);
 
         try {
