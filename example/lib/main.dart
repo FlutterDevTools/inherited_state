@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         reactives: [
           Inject<Counter>(() => Counter(0)),
         ],
-        immutables: [
+        services: [
           Inject<AppConfig>(() => const AppConfig(
                 appName: 'Inherited State Example',
                 baseUrl: 'https://reqres.in/api',
@@ -26,11 +26,11 @@ class MyApp extends StatelessWidget {
           Inject<CounterService>(() => CounterService(IS.get())),
         ],
         builder: (_) {
-          // final appConfig = IS.get<AppConfig>();
-          //IS.get<AppConfig>();
+          // final appConfig = InheritedService.get<AppConfig>();
+          final appConfig = IS.get<AppConfig>();
           return MaterialApp(
-            title: AppConfig.get().appName,
-            home: MyHomePage(title: AppConfig.get().appName),
+            title: appConfig.appName,
+            home: MyHomePage(title: appConfig.appName),
           );
         });
   }
@@ -53,13 +53,16 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     initialCounterFuture = counterService.getInitialCounter();
+    // Long form
     // initialCounterFuture.then((value) =>
-    //     RS.get<Counter>().setState((counter) => counter.count = value));
+    //     ReactiveService.getReactive<Counter>().setState((counter) => counter.count = value));
+    // Short form - Mutatable update
     initialCounterFuture
         .then((value) => RS.set<Counter>((counter) => counter.count = value));
   }
 
   void _incrementCounter() {
+    // Immutable update
     final res = RS.set<Counter>((counter) => Counter(counter.count + 1));
     print('increment result: $res');
   }

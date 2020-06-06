@@ -11,6 +11,8 @@ abstract class Injectable<T> {
   set singleton(T value);
   InjectNotifier<T> get notifier;
   ReactiveController<T> get stateSingleton;
+
+  void dispose();
 }
 
 /// [Inject] is used to register a type to a defined model instance function for
@@ -66,5 +68,16 @@ class Inject<T> implements Injectable<T> {
     final InheritedInject model =
         context.dependOnInheritedWidgetOfExactType<InheritedInject<T>>();
     return model;
+  }
+
+  @override
+  void dispose() {
+    try {
+      (singleton as dynamic)?.dispose();
+    } catch (e) {
+      if (e is! NoSuchMethodError) {
+        rethrow;
+      }
+    }
   }
 }

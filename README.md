@@ -1,6 +1,6 @@
 # inherited_state
 
-Simple state management (using InheritedWidget) and DI.
+Simple scoped reactive state management (using [InheritedWidget]) and DI. Supports both immutable and mutable updates.
 
 # Quick Start
 *pubspec.yaml*
@@ -9,14 +9,14 @@ inherited_state: ^0.0.1
 ```
 
 ## Setup
-`InheritedState` widget needs to be part of the tree as an ancestor to be able to use it from the descendent widgets similar to the usage of `InheritedWidget`. You can register the stateful and immutable states using the `reactives` and `immutables` arguments, respectively.
+`InheritedState` widget needs to be part of the tree as an ancestor to be able to use it from the descendent widgets similar to the usage of `InheritedWidget`. You can register the reactive states and services using the `reactives` and `services` arguments, respectively.
 
 ```dart
 InheritedState(
     reactives: [
         Inject<Counter>(() => Counter(0)),
     ],
-    immutables: [
+    services: [
         Inject<AppConfig>(() => const AppConfig(
             appName: 'Inherited State Example',
             baseUrl: 'https://reqres.in/api',
@@ -39,24 +39,25 @@ class Counter {
 
 // RS is an alias for ReactiveState.
 void _incrementCounter() {
-    RS.get<Counter>().setState((counter) => counter.count++);
+  // Immutable update
+  final res = RS.set<Counter>((counter) => Counter(counter.count + 1));
 }
 
 // Pass context to the `RS.get` method to subscribe to changes (widget automatically rebuilds when changes occur).
 @override
 Widget build(BuildContext context) {
-    final counter = RS.get<Counter>(context).state;
+    final counter = RS.get<Counter>(context);
     ...
 }
 ```
 
-### Immutable State (DI) - Services, Configs, etc.
+### Inherited Service (DI) - Services, Configs, etc.
 ```dart
-// IS is an alias for ImmutableState.
+// IS is an alias for InheritedService.
 final counterService = IS.get<CounterService>();
 ```
 
-## Full Example with Reactive and Immutable
+## Full Example with Reactive states and Services
 
 <details>
   <summary>main.yaml</summary>
@@ -64,11 +65,11 @@ final counterService = IS.get<CounterService>();
 ```dart
 import 'package:flutter/material.dart';
 import 'package:inherited_state/inherited_state.dart';
-import 'package:inherited_state_example/api_service.dart';
-import 'package:inherited_state_example/app_config.dart';
 
-import 'package:inherited_state_example/counter.dart';
-import 'package:inherited_state_example/counter_service.dart';
+import 'models/counter.dart';
+import 'services/api_service.dart';
+import 'services/app_config.dart';
+import 'services/counter_service.dart';
 
 void main() {
   runApp(MyApp());
@@ -81,7 +82,7 @@ class MyApp extends StatelessWidget {
         reactives: [
           Inject<Counter>(() => Counter(0)),
         ],
-        immutables: [
+        services: [
           Inject<AppConfig>(() => const AppConfig(
                 appName: 'Inherited State Example',
                 baseUrl: 'https://reqres.in/api',
@@ -90,13 +91,10 @@ class MyApp extends StatelessWidget {
           Inject<CounterService>(() => CounterService(IS.get())),
         ],
         builder: (_) {
+          // final appConfig = InheritedService.get<AppConfig>();
           final appConfig = IS.get<AppConfig>();
           return MaterialApp(
             title: appConfig.appName,
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-              visualDensity: VisualDensity.adaptivePlatformDensity,
-            ),
             home: MyHomePage(title: appConfig.appName),
           );
         });
@@ -120,17 +118,24 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     initialCounterFuture = counterService.getInitialCounter();
-    initialCounterFuture.then((value) =>
-        RS.get<Counter>().setState((counter) => counter.count = value));
+    // Long form
+    // initialCounterFuture.then((value) =>
+    //     ReactiveService.getReactive<Counter>().setState((counter) => counter.count = value));
+    // Short form - Mutatable update
+    initialCounterFuture
+        .then((value) => RS.set<Counter>((counter) => counter.count = value));
   }
 
   void _incrementCounter() {
-    RS.get<Counter>().setState((counter) => counter.count++);
+    // Immutable update
+    final res = RS.set<Counter>((counter) => Counter(counter.count + 1));
+    print('increment result: $res');
   }
 
   @override
   Widget build(BuildContext context) {
-    final counter = RS.get<Counter>(context).state;
+    final counter = RS.get<Counter>(context);
+    print('rebuild: $counter');
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -142,9 +147,9 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'You have pushed the button this many times:',
             ),
-            FutureBuilder<int>(
-              future: initialCounterFuture,
-              builder: (_, snapshot) => snapshot.hasData
+            const SizedBox(height: 20),
+            _buildFutureCounter(
+              (snapshot) => snapshot.hasData
                   ? Text(
                       '${counter.count}',
                       style: Theme.of(context).textTheme.headline4,
@@ -154,18 +159,26 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FutureBuilder<int>(
-        future: initialCounterFuture,
-        builder: (_, snapshot) => FloatingActionButton(
-          backgroundColor: snapshot.hasData ? null : Colors.grey,
-          disabledElevation: 0,
-          onPressed: snapshot.hasData ? _incrementCounter : null,
-          tooltip: 'Increment',
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: _buildFutureCounter(
+        (snapshot) {
+          print('floats $counter');
+          return FloatingActionButton(
+            backgroundColor: snapshot.hasData ? null : Colors.grey,
+            disabledElevation: 0,
+            onPressed: snapshot.hasData ? _incrementCounter : null,
+            tooltip: 'Increment',
+            child: const Icon(Icons.add),
+          );
+        },
       ),
     );
   }
+
+  Widget _buildFutureCounter(Widget Function(AsyncSnapshot) builder) =>
+      FutureBuilder<int>(
+        future: initialCounterFuture,
+        builder: (_, snapshot) => builder(snapshot),
+      );
 }
 ```
 </details>
