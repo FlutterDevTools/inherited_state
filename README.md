@@ -42,10 +42,10 @@ void _incrementCounter() {
     RS.get<Counter>().setState((counter) => counter.count++);
 }
 
-// Pass context to the `RS.get` method to subscribe to changes.
+// Pass context to the `RS.get` method to subscribe to changes (widget automatically rebuilds when changes occur).
 @override
 Widget build(BuildContext context) {
-    final counter = RS.get<Counter>(context: context).state;
+    final counter = RS.get<Counter>(context).state;
     ...
 }
 ```
@@ -130,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final counter = RS.get<Counter>(context: context).state;
+    final counter = RS.get<Counter>(context).state;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
