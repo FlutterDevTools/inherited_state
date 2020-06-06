@@ -78,6 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'You have pushed the button this many times:',
             ),
+            SizedBox(height: 20),
             FutureBuilder<int>(
               future: initialCounterFuture,
               builder: (_, snapshot) => snapshot.hasData
