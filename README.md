@@ -29,7 +29,7 @@ InheritedState(
 )
 ```
 
-### State
+### Reactive State - UI Change Notifications
 ```dart
 // Plain dart class
 class Counter {
@@ -50,7 +50,7 @@ Widget build(BuildContext context) {
 }
 ```
 
-### DI
+### Immutable State (DI) - Services, Configs, etc.
 ```dart
 // IS is an alias for ImmutableState.
 final counterService = IS.get<CounterService>();
