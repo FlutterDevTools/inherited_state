@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:inherited_state_example/api_service.dart';
+import 'api_service.dart';
 
 class CounterService {
   CounterService(this._apiService);

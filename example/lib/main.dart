@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:inherited_state/inherited_state.dart';
-import 'package:inherited_state_example/api_service.dart';
-import 'package:inherited_state_example/app_config.dart';
 
-import 'package:inherited_state_example/counter.dart';
-import 'package:inherited_state_example/counter_service.dart';
+import 'models/counter.dart';
+import 'services/api_service.dart';
+import 'services/app_config.dart';
+import 'services/counter_service.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,14 +26,11 @@ class MyApp extends StatelessWidget {
           Inject<CounterService>(() => CounterService(IS.get())),
         ],
         builder: (_) {
-          final appConfig = IS.get<AppConfig>();
+          // final appConfig = IS.get<AppConfig>();
+          //IS.get<AppConfig>();
           return MaterialApp(
-            title: appConfig.appName,
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-              visualDensity: VisualDensity.adaptivePlatformDensity,
-            ),
-            home: MyHomePage(title: appConfig.appName),
+            title: AppConfig.get().appName,
+            home: MyHomePage(title: AppConfig.get().appName),
           );
         });
   }
@@ -56,17 +53,21 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     initialCounterFuture = counterService.getInitialCounter();
-    initialCounterFuture.then((value) =>
-        RS.get<Counter>().setState((counter) => counter.count = value));
+    // initialCounterFuture.then((value) =>
+    //     RS.get<Counter>().setState((counter) => counter.count = value));
+    initialCounterFuture
+        .then((value) => Counter.state((counter) => counter.count = value));
   }
 
   void _incrementCounter() {
-    RS.get<Counter>().setState((counter) => counter.count++);
+    var res = Counter.state((counter) => Counter(counter.count + 1));
+    print("increment result: $res");
   }
 
   @override
   Widget build(BuildContext context) {
     final counter = RS.get<Counter>(context).state;
+    print('rebuild: $counter');
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -78,10 +79,9 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'You have pushed the button this many times:',
             ),
-            SizedBox(height: 20),
-            FutureBuilder<int>(
-              future: initialCounterFuture,
-              builder: (_, snapshot) => snapshot.hasData
+            const SizedBox(height: 20),
+            _buildFutureCounter(
+              (snapshot) => snapshot.hasData
                   ? Text(
                       '${counter.count}',
                       style: Theme.of(context).textTheme.headline4,
@@ -91,16 +91,24 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FutureBuilder<int>(
-        future: initialCounterFuture,
-        builder: (_, snapshot) => FloatingActionButton(
-          backgroundColor: snapshot.hasData ? null : Colors.grey,
-          disabledElevation: 0,
-          onPressed: snapshot.hasData ? _incrementCounter : null,
-          tooltip: 'Increment',
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: _buildFutureCounter(
+        (snapshot) {
+          print('floats $counter');
+          return FloatingActionButton(
+            backgroundColor: snapshot.hasData ? null : Colors.grey,
+            disabledElevation: 0,
+            onPressed: snapshot.hasData ? _incrementCounter : null,
+            tooltip: 'Increment',
+            child: const Icon(Icons.add),
+          );
+        },
       ),
     );
   }
+
+  Widget _buildFutureCounter(Widget Function(AsyncSnapshot) builder) =>
+      FutureBuilder<int>(
+        future: initialCounterFuture,
+        builder: (_, snapshot) => builder(snapshot),
+      );
 }

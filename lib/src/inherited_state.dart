@@ -59,6 +59,26 @@ class InheritedState extends StatefulWidget {
   final List<Injectable> immutables;
   final Widget Function(BuildContext) builder;
 
+  // static getImmutableCollection() {
+  //   return _InheritedState.immutableStates;
+  // }
+  static void replaceReactive<T>(T state) {
+    final key = Inject.getName<T>();
+    print('replace reactive: $key / $state');
+    // check equality.
+    _InheritedState.reactiveSates[key].forEach((injectable) {
+      if (injectable.singleton.runtimeType == T &&
+          injectable.singleton != state) {
+        // todo: do we have to dispose previous?
+        // injectable.singleton?.dispose();
+        injectable.singleton = state;
+      }
+      print("injecttt: ${injectable.singleton}");
+    });
+    //  == state;
+    // _InheritedState.replace<T>(state);
+  }
+
   static Inject<T> getReactiveState<T>() {
     return _InheritedState.reactiveSates[Inject.getName<T>()]?.last
         as Inject<T>;
@@ -96,12 +116,8 @@ class _InheritedState extends State<InheritedState> {
 
     localStates.forEach((state) {
       assert(state != null);
-      final name = state.name;
-      if (allStates[name] == null) {
-        allStates[name] = [state];
-      } else {
-        allStates[name].add(state);
-      }
+      allStates[state.name] ??= [];
+      allStates[state.name].add(state);
     });
   }
 
@@ -116,11 +132,11 @@ class _InheritedState extends State<InheritedState> {
   static void _disposeStates(
       List<Injectable> states, Map<String, List<Injectable>> allStates) {
     states.forEach((state) {
-      final name = state.name;
-      allStates[name]?.remove(state);
-      if (allStates[name]?.isEmpty ?? false) {
-        allStates.remove(name);
-
+      final key = state.name;
+      if (!allStates.containsKey(key)) return;
+      allStates[key].remove(state);
+      if (allStates[key].isEmpty) {
+        allStates.remove(key);
         try {
           (state.singleton as dynamic)?.dispose();
         } catch (e) {

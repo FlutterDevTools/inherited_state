@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import 'package:inherited_state_example/app_config.dart';
+import 'app_config.dart';
+
 
 class ApiService {
   const ApiService(this._appConfig);

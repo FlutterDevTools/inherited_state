@@ -39,10 +39,7 @@ class Inject<T> implements Injectable<T> {
   ReactiveController<T> _stateSingleton;
 
   @override
-  T get singleton {
-    _singleton ??= _creationFunction();
-    return _singleton;
-  }
+  T get singleton => _singleton ??= _creationFunction();
 
   @override
   ReactiveController<T> get stateSingleton {
