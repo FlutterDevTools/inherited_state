@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final counter = RS.get<Counter>(context: context).state;
+    final counter = RS.get<Counter>(context).state;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),

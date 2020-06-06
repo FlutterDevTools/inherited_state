@@ -4,8 +4,8 @@ import 'inject.dart';
 import 'reactive_controller.dart';
 
 class RS {
-  static ReactiveController<T> get<T>({BuildContext context}) =>
-      ReactiveState.get(context: context);
+  static ReactiveController<T> get<T>([BuildContext context]) =>
+      ReactiveState.get(context);
 }
 
 class IS {
@@ -17,7 +17,7 @@ class ImmutableState {
 }
 
 class ReactiveState {
-  static ReactiveController<T> get<T>({BuildContext context}) {
+  static ReactiveController<T> get<T>([BuildContext context]) {
     final state = InheritedState.getReactiveState<T>();
     if (context != null) state.staticOf(context);
     return state.stateSingleton;
