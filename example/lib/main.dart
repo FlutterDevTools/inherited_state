@@ -13,7 +13,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return InheritedContainer(
+    return InheritedState(
         reactives: [
           Inject<Counter>(() => Counter(0)),
         ],

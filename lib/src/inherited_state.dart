@@ -13,19 +13,19 @@ class IS {
 }
 
 class ImmutableState {
-  static T get<T>() => InheritedContainer.getImmutableState<T>().singleton;
+  static T get<T>() => InheritedState.getImmutableState<T>().singleton;
 }
 
 class ReactiveState {
   static ReactiveController<T> get<T>({BuildContext context}) {
-    final state = InheritedContainer.getReactiveState<T>();
+    final state = InheritedState.getReactiveState<T>();
     if (context != null) state.staticOf(context);
     return state.stateSingleton;
   }
 }
 
-class InheritedContainer extends StatefulWidget {
-  const InheritedContainer({
+class InheritedState extends StatefulWidget {
+  const InheritedState({
     Key key,
     @required this.reactives,
     @required this.immutables,
@@ -40,18 +40,18 @@ class InheritedContainer extends StatefulWidget {
   final Widget Function(BuildContext) builder;
 
   static Inject<T> getReactiveState<T>() {
-    return InheritedContainerState.reactiveSates['$T']?.last as Inject<T>;
+    return _InheritedState.reactiveSates['$T']?.last as Inject<T>;
   }
 
   static Inject<T> getImmutableState<T>() {
-    return InheritedContainerState.immutableStates['$T']?.last as Inject<T>;
+    return _InheritedState.immutableStates['$T']?.last as Inject<T>;
   }
 
   @override
-  State<InheritedContainer> createState() => InheritedContainerState();
+  State<InheritedState> createState() => _InheritedState();
 }
 
-class InheritedContainerState extends State<InheritedContainer> {
+class _InheritedState extends State<InheritedState> {
   static final Map<String, List<Injectable<dynamic>>> reactiveSates =
       <String, List<Injectable<dynamic>>>{};
   static final Map<String, List<Injectable<dynamic>>> immutableStates =
