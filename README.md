@@ -205,8 +205,10 @@ class _MyHomePageState extends State<MyHomePage> {
 [View file](example/lib/main.dart)
 
 # Inherited State Widget
-
+This widget is used to setup the reactive state instances available to the descendants. It can be used multiple times at different tree nodes. 
 
 # Reactive State
+Reactive state allows for subscriptions and updates to the underlying model in an immutable and mutable fashion depending on developer preference.
 
-# Immutable State
+# Services
+`ServiceLocator` allows for a simple way of registering global dependencies that can be used anywhere within the app without relying on flutter context or any sort of UI related mechanism. Services can be accessed and referenced and the reference is always a singleton.

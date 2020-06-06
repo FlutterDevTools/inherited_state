@@ -1,5 +1,6 @@
 name: inherited_state
 description: Simple state management (using InheritedWidget) and DI
+homepage: https://github.com/FlutterDevTools/inherited_state
 version: 0.0.1
 
 environment:
