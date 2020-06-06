@@ -13,7 +13,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return InheritedContainer(
+    return InheritedState(
         reactives: [
           Inject<Counter>(() => Counter(0)),
         ],
@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final counter = RS.get<Counter>(context: context).state;
+    final counter = RS.get<Counter>(context).state;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),

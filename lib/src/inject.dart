@@ -12,13 +12,23 @@ abstract class Injectable<T> {
   ReactiveController<T> get stateSingleton;
 }
 
+/// [Inject] is used to register a type to a defined model instance function for 
+/// reactive or immutable state management.
 class Inject<T> implements Injectable<T> {
+  /// Registers a type to an instance function which is exposed as a singleton 
+  /// to its descendants.
+  ///
+  /// The type can be registered as a reactive or immutable state object.
+  /// The [_creationFunction] is called lazily and the instance value 
+  /// is stored for later access.
   Inject(this._creationFunction);
 
   final T Function() _creationFunction;
 
   @override
-  String get name => '$T';
+  String get name => getName<T>();
+
+  static String getName<T>() => '$T';
 
   final InjectNotifier<T> _notifier = InjectNotifier<T>(null);
   @override

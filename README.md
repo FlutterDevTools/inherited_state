@@ -9,24 +9,27 @@ inherited_state: ^0.0.1
 ```
 
 ## Setup
-`InheritedContainer` widget needs to be part of the tree as an ancestor to be able to use it from the descendent widgets similar to the usage of `InheritedWidget`. You can register the stateful and plain classes using the `inject` and `dependencies` arguments, respectively.
+`InheritedState` widget needs to be part of the tree as an ancestor to be able to use it from the descendent widgets similar to the usage of `InheritedWidget`. You can register the stateful and immutable states using the `reactives` and `immutables` arguments, respectively.
 
 ```dart
-InheritedContainer(
-    states: [
+InheritedState(
+    reactives: [
         Inject<Counter>(() => Counter(0)),
     ],
-    dependencies: [
-        Inject<AppConfig>(
-            () => const AppConfig(appName: 'Inherited State Example')),
-        Inject<CounterService>(() => CounterService()),
+    immutables: [
+        Inject<AppConfig>(() => const AppConfig(
+            appName: 'Inherited State Example',
+            baseUrl: 'https://reqres.in/api',
+            )),
+        Inject<ApiService>(() => ApiService(IS.get())),
+        Inject<CounterService>(() => CounterService(IS.get())),
     ],
     builder: (_) =>
     ...
 )
 ```
 
-## State
+### Reactive State - UI Change Notifications
 ```dart
 // Plain dart class
 class Counter {
@@ -34,29 +37,39 @@ class Counter {
     int count = 0;
 }
 
-// SC is an alias for StateContainer.
+// RS is an alias for ReactiveState.
 void _incrementCounter() {
-    SC.get<Counter>().setState((counter) => counter.count++);
+    RS.get<Counter>().setState((counter) => counter.count++);
 }
 
-// Pass context to the `SC.get` method to subscribe to changes.
+// Pass context to the `RS.get` method to subscribe to changes (widget automatically rebuilds when changes occur).
 @override
 Widget build(BuildContext context) {
-    final counter = SC.get<Counter>(context: context).state;
+    final counter = RS.get<Counter>(context).state;
     ...
 }
 ```
 
-## DI
+### Immutable State (DI) - Services, Configs, etc.
 ```dart
-// DC is an alias for DependencyContainer.
-final counterService = DC.get<CounterService>();
+// IS is an alias for ImmutableState.
+final counterService = IS.get<CounterService>();
 ```
 
-## Full Example with Stateful and Plain
+## Full Example with Reactive and Immutable
 
-*main.yaml*
+<details>
+  <summary>main.yaml</summary>
+
 ```dart
+import 'package:flutter/material.dart';
+import 'package:inherited_state/inherited_state.dart';
+import 'package:inherited_state_example/api_service.dart';
+import 'package:inherited_state_example/app_config.dart';
+
+import 'package:inherited_state_example/counter.dart';
+import 'package:inherited_state_example/counter_service.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -64,17 +77,20 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return InheritedContainer(
-        states: [
+    return InheritedState(
+        reactives: [
           Inject<Counter>(() => Counter(0)),
         ],
-        dependencies: [
-          Inject<AppConfig>(
-              () => const AppConfig(appName: 'Inherited State Example')),
-          Inject<CounterService>(() => CounterService()),
+        immutables: [
+          Inject<AppConfig>(() => const AppConfig(
+                appName: 'Inherited State Example',
+                baseUrl: 'https://reqres.in/api',
+              )),
+          Inject<ApiService>(() => ApiService(IS.get())),
+          Inject<CounterService>(() => CounterService(IS.get())),
         ],
         builder: (_) {
-          final appConfig = DC.get<AppConfig>();
+          final appConfig = IS.get<AppConfig>();
           return MaterialApp(
             title: appConfig.appName,
             theme: ThemeData(
@@ -97,7 +113,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final counterService = DC.get<CounterService>();
+  final counterService = IS.get<CounterService>();
   Future<int> initialCounterFuture;
 
   @override
@@ -105,16 +121,16 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     initialCounterFuture = counterService.getInitialCounter();
     initialCounterFuture.then((value) =>
-        SC.get<Counter>().setState((counter) => counter.count = value));
+        RS.get<Counter>().setState((counter) => counter.count = value));
   }
 
   void _incrementCounter() {
-    SC.get<Counter>().setState((counter) => counter.count++);
+    RS.get<Counter>().setState((counter) => counter.count++);
   }
 
   @override
   Widget build(BuildContext context) {
-    final counter = SC.get<Counter>(context: context).state;
+    final counter = RS.get<Counter>(context).state;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -151,12 +167,14 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
 ```
+</details>
+
+[View file](example/lib/main.dart)
+
+# Inherited State Widget
 
 
-# State Container
+# Reactive State
 
-# Dependency Container
-
-# Inherited Container
+# Immutable State
