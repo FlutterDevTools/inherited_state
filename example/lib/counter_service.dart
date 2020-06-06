@@ -9,7 +9,8 @@ class CounterService {
   final _random = Random();
 
   Future<int> getInitialCounter() async {
-    await _apiService.get<int>();
-    return _random.nextInt(500) + 9000;
+    final userId = _random.nextInt(10);
+    final data = await _apiService.get<Map<String, dynamic>>('users/$userId');
+    return (data['data']['avatar'] as String).length;
   }
 }

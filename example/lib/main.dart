@@ -18,8 +18,10 @@ class MyApp extends StatelessWidget {
           Inject<Counter>(() => Counter(0)),
         ],
         immutables: [
-          Inject<AppConfig>(
-              () => const AppConfig(appName: 'Inherited State Example')),
+          Inject<AppConfig>(() => const AppConfig(
+                appName: 'Inherited State Example',
+                baseUrl: 'https://reqres.in/api',
+              )),
           Inject<ApiService>(() => ApiService(IS.get())),
           Inject<CounterService>(() => CounterService(IS.get())),
         ],

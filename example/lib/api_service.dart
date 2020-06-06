@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import 'package:inherited_state_example/app_config.dart';
 
 class ApiService {
@@ -5,10 +9,14 @@ class ApiService {
 
   final AppConfig _appConfig;
 
-  Future<T> get<T>() async {
-    final baseUrl = _appConfig.baseUrl;
-    // Make API request
-    await Future<dynamic>.delayed(const Duration(seconds: 1));
-    return null;
+  String get baseUrl => _appConfig.baseUrl;
+
+  String getUrl(String relativeUrl) {
+    return '$baseUrl/$relativeUrl';
+  }
+
+  Future<T> get<T>(String relativeUrl) async {
+    final response = await http.get(getUrl(relativeUrl));
+    return json.decode(response.body) as T;
   }
 }
