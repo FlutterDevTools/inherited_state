@@ -59,7 +59,7 @@ final counterService = IS.get<CounterService>();
 ## Full Example with Stateful and Plain
 
 <details>
-  <summary>*main.yaml*</summary>
+  <summary>main.yaml</summary>
 
 ```dart
 import 'package:flutter/material.dart';
@@ -170,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
 ```
 </details>
 
-[View file](blob/master/example/lib/main.dart)
+[View file](example/lib/main.dart)
 
 # Inherited State Widget
 
