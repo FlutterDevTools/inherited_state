@@ -18,9 +18,14 @@ class ImmutableState {
 
 /// Alias for [ReactiveState]
 class RS {
+  /// Alias for [ReactiveState.getReactive]
+  static ReactiveController<T> getReactive<T>([BuildContext context]) =>
+      ReactiveState.getReactive(context);
+
   /// Alias for [ReactiveState.get]
-  static ReactiveController<T> get<T>([BuildContext context]) =>
-      ReactiveState.get(context);
+  static T get<T>([BuildContext context]) => ReactiveState.get(context);
+
+  /// Alias for [ReactiveState.set]
   static T set<T>([dynamic Function(T) call]) => ReactiveState.set(call);
 }
 
@@ -31,14 +36,28 @@ class ReactiveState {
   /// Provides a way to access a pre-registered reactive controller instance of type [T].
   /// If an optional [context] is provided, the widget is subscribed and will update on
   /// all changes whenever the [ReactiveController.setState] method is called.
-  static ReactiveController<T> get<T>([BuildContext context]) {
+  static ReactiveController<T> getReactive<T>([BuildContext context]) {
     final state = InheritedState.getReactiveState<T>();
     if (context != null) state.staticOf(context);
     return state.stateSingleton;
   }
 
+  /// Provides a way to access a pre-registered reactive instance of type [T].
+  /// [context] must be provided so the widget is subscribed and will update on
+  /// all changes whenever the [ReactiveController.setState] method is called.
+  static T get<T>(BuildContext context) {
+    final state = InheritedState.getReactiveState<T>();
+    if (context != null) state.staticOf(context);
+    return state.singleton;
+  }
+
+  /// Provides a shortcut for updating state of type [T].
+  /// This update can be mutable or immutable depending on if the setter [call] method
+  /// returns the same type.
+  ///
+  /// This calls the underlying [ReactiveController.setState] method to update the state.
   static T set<T>([dynamic Function(T) call]) {
-    final value = RS.get<T>();
+    final value = RS.getReactive<T>();
     value.setState(call);
     return value.state;
   }
