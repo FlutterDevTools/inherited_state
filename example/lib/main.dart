@@ -7,7 +7,19 @@ import 'services/app_config.dart';
 import 'services/counter_service.dart';
 
 void main() {
+  registerDependencies();
   runApp(MyApp());
+}
+
+void registerDependencies() {
+  SL.register(
+    () => const AppConfig(
+      appName: 'Inherited State Example',
+      baseUrl: 'https://reqres.in/api',
+    ),
+  );
+  SL.register(() => ApiService(SL.get()));
+  SL.register(() => CounterService(SL.get()));
 }
 
 class MyApp extends StatelessWidget {
@@ -17,17 +29,9 @@ class MyApp extends StatelessWidget {
         reactives: [
           Inject<Counter>(() => Counter(0)),
         ],
-        services: [
-          Inject<AppConfig>(() => const AppConfig(
-                appName: 'Inherited State Example',
-                baseUrl: 'https://reqres.in/api',
-              )),
-          Inject<ApiService>(() => ApiService(IS.get())),
-          Inject<CounterService>(() => CounterService(IS.get())),
-        ],
         builder: (_) {
           // final appConfig = InheritedService.get<AppConfig>();
-          final appConfig = IS.get<AppConfig>();
+          final appConfig = SL.get<AppConfig>();
           return MaterialApp(
             title: appConfig.appName,
             home: MyHomePage(title: appConfig.appName),
@@ -46,7 +50,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final counterService = IS.get<CounterService>();
+  final counterService = SL.get<CounterService>();
   Future<int> initialCounterFuture;
 
   @override
@@ -57,13 +61,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // initialCounterFuture.then((value) =>
     //     ReactiveService.getReactive<Counter>().setState((counter) => counter.count = value));
     // Short form - Mutatable update
-    initialCounterFuture
-        .then((value) => RS.set<Counter>((counter) => counter.count = value));
+    initialCounterFuture.then((value) =>
+        RS.set<Counter>(context, (counter) => counter.count = value));
   }
 
   void _incrementCounter() {
     // Immutable update
-    final res = RS.set<Counter>((counter) => Counter(counter.count + 1));
+    final res =
+        RS.set<Counter>(context, (counter) => Counter(counter.count + 1));
     print('increment result: $res');
   }
 

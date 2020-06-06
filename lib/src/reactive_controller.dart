@@ -13,7 +13,7 @@ class ReactiveController<T> {
     final dynamic updateResult = stateUpdateFn(state);
     final newState = updateResult is T ? updateResult : state;
     if (newState != null) {
-      InheritedState.replaceReactive(newState);
+      InheritedState.replaceReactive(_inject, newState);
       _inject.notifier.value = newState;
     }
   }

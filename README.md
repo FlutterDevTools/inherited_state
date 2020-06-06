@@ -8,21 +8,13 @@ Simple scoped reactive state management (using [InheritedWidget]) and DI. Suppor
 inherited_state: ^0.0.1
 ```
 
-## Setup
-`InheritedState` widget needs to be part of the tree as an ancestor to be able to use it from the descendent widgets similar to the usage of `InheritedWidget`. You can register the reactive states and services using the `reactives` and `services` arguments, respectively.
+## Setup State Management
+`InheritedState` widget needs to be part of the tree as an ancestor to be able to use it from the descendent widgets similar to the usage of `InheritedWidget`. You can register the reactive states using the `reactives` argument.
 
 ```dart
 InheritedState(
     reactives: [
         Inject<Counter>(() => Counter(0)),
-    ],
-    services: [
-        Inject<AppConfig>(() => const AppConfig(
-            appName: 'Inherited State Example',
-            baseUrl: 'https://reqres.in/api',
-            )),
-        Inject<ApiService>(() => ApiService(IS.get())),
-        Inject<CounterService>(() => CounterService(IS.get())),
     ],
     builder: (_) =>
     ...
@@ -40,7 +32,7 @@ class Counter {
 // RS is an alias for ReactiveState.
 void _incrementCounter() {
   // Immutable update
-  final res = RS.set<Counter>((counter) => Counter(counter.count + 1));
+  final res = RS.set<Counter>(context, (counter) => Counter(counter.count + 1));
 }
 
 // Pass context to the `RS.get` method to subscribe to changes (widget automatically rebuilds when changes occur).
@@ -51,10 +43,29 @@ Widget build(BuildContext context) {
 }
 ```
 
-### Inherited Service (DI) - Services, Configs, etc.
+## Setup DI
 ```dart
-// IS is an alias for InheritedService.
-final counterService = IS.get<CounterService>();
+void main() {
+  registerDependencies();
+  runApp(MyApp());
+}
+
+void registerDependencies() {
+  SL.register(
+    () => const AppConfig(
+      appName: 'Inherited State Example',
+      baseUrl: 'https://reqres.in/api',
+    ),
+  );
+  SL.register(() => ApiService(SL.get()));
+  SL.register(() => CounterService(SL.get()));
+}
+```
+
+### Service Locator (DI) - Services, Configs, etc.
+```dart
+// SL is an alias for ServiceLocator.
+final counterService = SL.get<CounterService>();
 ```
 
 ## Full Example with Reactive states and Services
@@ -72,7 +83,19 @@ import 'services/app_config.dart';
 import 'services/counter_service.dart';
 
 void main() {
+  registerDependencies();
   runApp(MyApp());
+}
+
+void registerDependencies() {
+  SL.register(
+    () => const AppConfig(
+      appName: 'Inherited State Example',
+      baseUrl: 'https://reqres.in/api',
+    ),
+  );
+  SL.register(() => ApiService(SL.get()));
+  SL.register(() => CounterService(SL.get()));
 }
 
 class MyApp extends StatelessWidget {
@@ -82,17 +105,9 @@ class MyApp extends StatelessWidget {
         reactives: [
           Inject<Counter>(() => Counter(0)),
         ],
-        services: [
-          Inject<AppConfig>(() => const AppConfig(
-                appName: 'Inherited State Example',
-                baseUrl: 'https://reqres.in/api',
-              )),
-          Inject<ApiService>(() => ApiService(IS.get())),
-          Inject<CounterService>(() => CounterService(IS.get())),
-        ],
         builder: (_) {
           // final appConfig = InheritedService.get<AppConfig>();
-          final appConfig = IS.get<AppConfig>();
+          final appConfig = SL.get<AppConfig>();
           return MaterialApp(
             title: appConfig.appName,
             home: MyHomePage(title: appConfig.appName),
@@ -111,7 +126,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final counterService = IS.get<CounterService>();
+  final counterService = SL.get<CounterService>();
   Future<int> initialCounterFuture;
 
   @override
@@ -122,13 +137,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // initialCounterFuture.then((value) =>
     //     ReactiveService.getReactive<Counter>().setState((counter) => counter.count = value));
     // Short form - Mutatable update
-    initialCounterFuture
-        .then((value) => RS.set<Counter>((counter) => counter.count = value));
+    initialCounterFuture.then((value) =>
+        RS.set<Counter>(context, (counter) => counter.count = value));
   }
 
   void _incrementCounter() {
     // Immutable update
-    final res = RS.set<Counter>((counter) => Counter(counter.count + 1));
+    final res =
+        RS.set<Counter>(context, (counter) => Counter(counter.count + 1));
     print('increment result: $res');
   }
 
@@ -180,6 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (_, snapshot) => builder(snapshot),
       );
 }
+
 ```
 </details>
 

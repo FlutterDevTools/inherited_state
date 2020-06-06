@@ -59,15 +59,21 @@ class Inject<T> implements Injectable<T> {
       builder: (ctx, _, __) {
         return InheritedInject<T>(
           child: child,
+          injectable: this,
         );
       },
     );
   }
 
-  InheritedInject staticOf(BuildContext context) {
-    final InheritedInject model =
-        context.dependOnInheritedWidgetOfExactType<InheritedInject<T>>();
-    return model;
+  static InheritedInject<T> staticOf<T>(BuildContext context,
+      [bool subscribe = false]) {
+    if (subscribe) {
+      return context.dependOnInheritedWidgetOfExactType<InheritedInject<T>>();
+    } else {
+      return context
+          .getElementForInheritedWidgetOfExactType<InheritedInject<T>>()
+          .widget as InheritedInject<T>;
+    }
   }
 
   @override
