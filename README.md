@@ -164,24 +164,22 @@ class _MyHomePageState extends State<MyHomePage> {
               'You have pushed the button this many times:',
             ),
             const SizedBox(height: 20),
-            _buildFutureCounter(
-              (snapshot) => snapshot.hasData
-                  ? Text(
+            _buildFutureWaiter(
+                (isReady) => Text(
                       '${counter.count}',
                       style: Theme.of(context).textTheme.headline4,
-                    )
-                  : const CircularProgressIndicator(),
-            ),
+                    ),
+                true),
           ],
         ),
       ),
-      floatingActionButton: _buildFutureCounter(
-        (snapshot) {
+      floatingActionButton: _buildFutureWaiter(
+        (isReady) {
           print('floats $counter');
           return FloatingActionButton(
-            backgroundColor: snapshot.hasData ? null : Colors.grey,
+            backgroundColor: isReady ? null : Colors.grey,
             disabledElevation: 0,
-            onPressed: snapshot.hasData ? _incrementCounter : null,
+            onPressed: isReady ? _incrementCounter : null,
             tooltip: 'Increment',
             child: const Icon(Icons.add),
           );
@@ -190,12 +188,16 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildFutureCounter(Widget Function(AsyncSnapshot) builder) =>
+  Widget _buildFutureWaiter(Widget Function(bool isReady) builder,
+          [bool showSpinner = false]) =>
       FutureBuilder<int>(
         future: initialCounterFuture,
-        builder: (_, snapshot) => builder(snapshot),
+        builder: (_, snapshot) => showSpinner && !snapshot.hasData
+            ? const CircularProgressIndicator()
+            : builder(snapshot.hasData),
       );
 }
+
 
 ```
 </details>
