@@ -21,6 +21,7 @@ class RS {
   /// Alias for [ReactiveState.get]
   static ReactiveController<T> get<T>([BuildContext context]) =>
       ReactiveState.get(context);
+  static T set<T>([dynamic Function(T) call]) => ReactiveState.set(call);
 }
 
 /// [ReactiveState] is used to access reactive state controller of a given pre-registered type.
@@ -34,6 +35,12 @@ class ReactiveState {
     final state = InheritedState.getReactiveState<T>();
     if (context != null) state.staticOf(context);
     return state.stateSingleton;
+  }
+
+  static T set<T>([dynamic Function(T) call]) {
+    final value = RS.get<T>();
+    value.setState(call);
+    return value.state;
   }
 }
 

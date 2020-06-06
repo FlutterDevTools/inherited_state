@@ -56,12 +56,12 @@ class _MyHomePageState extends State<MyHomePage> {
     // initialCounterFuture.then((value) =>
     //     RS.get<Counter>().setState((counter) => counter.count = value));
     initialCounterFuture
-        .then((value) => Counter.state((counter) => counter.count = value));
+        .then((value) => RS.set<Counter>((counter) => counter.count = value));
   }
 
   void _incrementCounter() {
-    var res = Counter.state((counter) => Counter(counter.count + 1));
-    print("increment result: $res");
+    final res = RS.set<Counter>((counter) => Counter(counter.count + 1));
+    print('increment result: $res');
   }
 
   @override
