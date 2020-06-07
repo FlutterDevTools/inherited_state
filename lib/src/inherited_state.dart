@@ -55,17 +55,17 @@ class InheritedState extends StatefulWidget {
   /// [InheritedState] is used to register reactive and immutable state functions that
   /// can be used by the descendant widgets.
   ///
-  /// Both [reactives] and [immutables] accept a list of [Inject]s that essentially
-  /// registers a instance creation function to be used when a state type is requested.
+  /// [states] accepts a list of [Inject]s that essentially
+  /// register an instance creation function to be used when a state type is requested.
   const InheritedState({
     Key key,
-    @required this.reactives,
+    @required this.states,
     @required this.builder,
-  })  : assert(reactives != null),
+  })  : assert(states != null),
         assert(builder != null),
         super(key: key);
 
-  final List<Injectable> reactives;
+  final List<Injectable> states;
   final Widget Function(BuildContext) builder;
 
   static void replaceReactive<T>(Injectable<T> injectable, T state) {
@@ -79,12 +79,12 @@ class InheritedState extends StatefulWidget {
 }
 
 class _InheritedState extends State<InheritedState> {
-  final _reactives = <Injectable>[];
+  final _states = <Injectable>[];
 
   @override
   void initState() {
     super.initState();
-    _initStates(widget.reactives, _reactives);
+    _initStates(widget.states, _states);
   }
 
   static void _initStates(
@@ -96,7 +96,7 @@ class _InheritedState extends State<InheritedState> {
 
   @override
   void dispose() {
-    _disposeStates(_reactives);
+    _disposeStates(_states);
 
     super.dispose();
   }
@@ -115,7 +115,7 @@ class _InheritedState extends State<InheritedState> {
       },
     );
 
-    return _reactives.reversed.fold(
+    return _states.reversed.fold(
       child,
       (child, inject) => inject.inheritedInject(child),
     );

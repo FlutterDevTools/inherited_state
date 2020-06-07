@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InheritedState(
-        reactives: [
+        states: [
           Inject<Counter>(() => Counter(0)),
         ],
         builder: (_) {

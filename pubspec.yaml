@@ -1,7 +1,7 @@
 name: inherited_state
-description: Simple state management (using InheritedWidget) and DI
+description: Simple and clean state management backed by InheritedWidget and DI backed by the service locator pattern.
 homepage: https://github.com/FlutterDevTools/inherited_state
-version: 0.0.1
+version: 0.1.0
 
 environment:
   sdk: ">=2.7.0 <3.0.0"

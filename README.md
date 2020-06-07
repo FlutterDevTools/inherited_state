@@ -5,15 +5,15 @@ Simple scoped reactive state management (using [InheritedWidget]) and DI. Suppor
 # Quick Start
 *pubspec.yaml*
 ```yaml
-inherited_state: ^0.0.1
+inherited_state: ^0.1.0
 ```
 
 ## Setup State Management
-`InheritedState` widget needs to be part of the tree as an ancestor to be able to use it from the descendent widgets similar to the usage of `InheritedWidget`. You can register the reactive states using the `reactives` argument.
+`InheritedState` widget needs to be part of the tree as an ancestor to be able to use it from the descendent widgets similar to the usage of `InheritedWidget`. You can register the reactive states using the `states` argument.
 
 ```dart
 InheritedState(
-    reactives: [
+    states: [
         Inject<Counter>(() => Counter(0)),
     ],
     builder: (_) =>
@@ -102,7 +102,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InheritedState(
-        reactives: [
+        states: [
           Inject<Counter>(() => Counter(0)),
         ],
         builder: (_) {
