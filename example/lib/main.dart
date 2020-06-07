@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // );
 
     // Mutable update (reuses same instance)
-    final result = context.set<Counter>(
+    final result = context.dispatch<Counter>(
       (obj) => obj.count += 1,
     );
 

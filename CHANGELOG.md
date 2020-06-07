@@ -1,5 +1,6 @@
 ## 0.2.0 - 2020-06-07
 * Added admin page to example which allows for resetting the counter.
+* Rename `BuildContext` `set` extension method to `dispatch`. 
 
 ## 0.1.1 - 2020-06-06
 * Fix changelog.

@@ -122,8 +122,8 @@ class _InheritedState extends State<InheritedState> {
   }
 }
 
-extension BuildContextExtension on BuildContext {
+extension BuildContextEventExtension on BuildContext {
   T on<T>() => ReactiveState.get<T>(this);
   T once<T>() => ReactiveState.get<T>(this, false);
-  T set<T>([dynamic Function(T) call]) => ReactiveState.set<T>(this, call);
+  T dispatch<T>([dynamic Function(T) call]) => ReactiveState.set<T>(this, call);
 }
