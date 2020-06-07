@@ -66,16 +66,28 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _incrementCounter() {
-    // Immutable update
-    final res =
-        RS.set<Counter>(context, (counter) => Counter(counter.count + 1));
-    print('increment result: $res');
+    // Immutable update (creates a new instance)
+    // final counter = RS.set<Counter>(
+    //   context,
+    //   (obj) => Counter(obj.count + 1),
+    // );
+
+    // Mutable update (reuses same instance)
+    final result = context.set<Counter>(
+      (obj) => obj.count += 1,
+    );
+
+    print('increment result: $result / #code: ${result.hashCode}');
   }
 
   @override
   Widget build(BuildContext context) {
-    final counter = RS.get<Counter>(context);
-    print('rebuild: $counter');
+    // shortcut api
+    // final counter = RS.get<Counter>(context);
+
+    // extensions api
+    final counter = context.on<Counter>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),

@@ -68,10 +68,10 @@ class InheritedState extends StatefulWidget {
   final List<Injectable> states;
   final Widget Function(BuildContext) builder;
 
+  // todo: remember to fix the singleton access.
   static void replaceReactive<T>(Injectable<T> injectable, T state) {
-    injectable.dispose();
     injectable.singleton = state;
-    print('replace inject: ${injectable.singleton}');
+    injectable.dispose();
   }
 
   @override
@@ -105,6 +105,7 @@ class _InheritedState extends State<InheritedState> {
     injectables.forEach((injectable) {
       injectable.dispose();
     });
+    injectables.clear();
   }
 
   @override
@@ -120,4 +121,11 @@ class _InheritedState extends State<InheritedState> {
       (child, inject) => inject.inheritedInject(child),
     );
   }
+}
+
+extension BuildContextExtension on BuildContext {
+  T on<T>() => ReactiveState.get<T>(this);
+  // todo: add a way to "read" the model passively.
+  // T once<T>() => ReactiveState.get<T>(this);
+  T set<T>([dynamic Function(T) call]) => ReactiveState.set<T>(this, call);
 }

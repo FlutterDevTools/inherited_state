@@ -9,7 +9,5 @@ class InheritedInject<T> extends InheritedWidget {
   final Injectable<T> injectable;
 
   @override
-  bool updateShouldNotify(InheritedInject<T> oldWidget) {
-    return true;
-  }
+  bool updateShouldNotify(InheritedInject<T> oldWidget) => true;
 }

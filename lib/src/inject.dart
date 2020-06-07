@@ -47,21 +47,16 @@ class Inject<T> implements Injectable<T> {
   set singleton(T value) => _singleton = value;
 
   @override
-  ReactiveController<T> get stateSingleton {
-    _stateSingleton ??= ReactiveController<T>(this);
-    return _stateSingleton;
-  }
+  ReactiveController<T> get stateSingleton => _stateSingleton ??= ReactiveController<T>(this);
 
   @override
   Widget inheritedInject(Widget child) {
     return ValueListenableBuilder<T>(
       valueListenable: _notifier,
-      builder: (ctx, _, __) {
-        return InheritedInject<T>(
+      builder: (ctx, _, __) => InheritedInject<T>(
           child: child,
           injectable: this,
-        );
-      },
+        ),
     );
   }
 
