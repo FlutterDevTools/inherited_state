@@ -49,6 +49,50 @@ class ReactiveState {
   }
 }
 
+// Alias for [InheritedSingleState]
+class ISS<T> extends InheritedSingleState<T> {
+  const ISS({
+    Key key,
+    @required T Function() initialStateFn,
+    @required
+        Widget Function(BuildContext context, T Function() getter,
+                void Function(T) setter)
+            builder,
+  }) : super(key: key, initialStateFn: initialStateFn, builder: builder);
+}
+
+/// [InheritedSingleState] widget which allows for quick getter and setter for one-off single state value passing.
+class InheritedSingleState<T> extends StatelessWidget {
+  /// [InheritedSingleState] is useful for quick getter and setter for one-off single state value passing.
+  /// 
+  /// [initialStateFn] is used to setup the state value.
+  /// [builder] provider [context], [getter], and [setter] values.
+  const InheritedSingleState({
+    Key key,
+    @required this.initialStateFn,
+    @required this.builder,
+  })  : assert(initialStateFn != null),
+        assert(builder != null),
+        super(key: key);
+
+  final T Function() initialStateFn;
+  final Widget Function(
+          BuildContext context, T Function() getter, void Function(T) setter)
+      builder;
+
+  @override
+  Widget build(BuildContext context) {
+    return InheritedState(
+      states: [Inject<T>(() => initialStateFn())],
+      builder: (context) => builder(
+        context,
+        context.on,
+        (T value) => context.set((_) => value),
+      ),
+    );
+  }
+}
+
 /// [InheritedState] is used to register reactive and immutable state functions that
 /// can be used by the descendant widgets.
 class InheritedState extends StatefulWidget {
@@ -102,7 +146,7 @@ class _InheritedState extends State<InheritedState> {
 
   static void _disposeStates(List<Injectable> injectables) {
     injectables.forEach((injectable) {
-      injectable.dispose();
+      injectable.disposeSingleton();
     });
     injectables.clear();
   }

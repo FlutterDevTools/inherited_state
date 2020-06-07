@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:inherited_state/inherited_state.dart';
+import 'package:inherited_state_example/admin_page.dart';
 
 import 'models/counter.dart';
 import 'services/api_service.dart';
@@ -91,6 +93,17 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.push<dynamic>(
+              context,
+              CupertinoPageRoute<dynamic>(
+                builder: (_) => AdminPage(),
+              ),
+            ),
+          )
+        ],
       ),
       body: Center(
         child: Column(
