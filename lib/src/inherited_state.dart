@@ -34,8 +34,8 @@ class ReactiveState {
   /// Provides a way to access a pre-registered reactive instance of type [T].
   /// [context] must be provided so the widget is subscribed and will update on
   /// all changes whenever the [ReactiveController.setState] method is called.
-  static T get<T>(BuildContext context) =>
-      Inject.staticOf<T>(context, true).injectable.singleton;
+  static T get<T>(BuildContext context, [bool subscribe = true]) =>
+      Inject.staticOf<T>(context, subscribe).injectable.singleton;
 
   /// Provides a shortcut for updating state of type [T].
   /// This update can be mutable or immutable depending on if the setter [call] method
@@ -68,10 +68,9 @@ class InheritedState extends StatefulWidget {
   final List<Injectable> states;
   final Widget Function(BuildContext) builder;
 
-  // todo: remember to fix the singleton access.
   static void replaceReactive<T>(Injectable<T> injectable, T state) {
+    injectable.disposeSingleton();
     injectable.singleton = state;
-    injectable.dispose();
   }
 
   @override
@@ -125,7 +124,6 @@ class _InheritedState extends State<InheritedState> {
 
 extension BuildContextExtension on BuildContext {
   T on<T>() => ReactiveState.get<T>(this);
-  // todo: add a way to "read" the model passively.
-  // T once<T>() => ReactiveState.get<T>(this);
+  T once<T>() => ReactiveState.get<T>(this, false);
   T set<T>([dynamic Function(T) call]) => ReactiveState.set<T>(this, call);
 }
