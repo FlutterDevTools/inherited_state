@@ -1,5 +1,4 @@
 ## 0.2.0 - 2020-06-07
-* Added `InheritedSingleState` (with alias `ISS`) widget which allows for quick getter and setter for one-off single state value passing.
 * Added admin page to example which allows for resetting the counter.
 
 ## 0.1.1 - 2020-06-06
