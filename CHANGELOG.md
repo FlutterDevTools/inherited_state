@@ -1,3 +1,6 @@
+## 0.3.0 - 2020-08-02
+* Add `getFromRoot` and `getReactiveFromRoot` to allow getting root injected instances without providing context. 
+
 ## 0.2.0 - 2020-06-07
 * Added admin page to example which allows for resetting the counter.
 * Rename `BuildContext` `set` extension method to `dispatch`. 

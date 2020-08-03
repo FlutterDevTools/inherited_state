@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:inherited_state/inherited_state.dart';
 import 'package:inherited_state_example/admin_page.dart';
+import 'package:inherited_state_example/services/test_service.dart';
 
 import 'models/counter.dart';
 import 'services/api_service.dart';
@@ -21,6 +22,7 @@ void registerDependencies() {
     ),
   );
   SL.register(() => ApiService(SL.get()));
+  SL.register(() => TestService());
   SL.register(() => CounterService(SL.get()));
 }
 
@@ -53,6 +55,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final counterService = SL.get<CounterService>();
+  final testService = SL.get<TestService>();
   Future<int> initialCounterFuture;
 
   @override
@@ -69,15 +72,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() {
     // Immutable update (creates a new instance)
-    // final counter = RS.set<Counter>(
-    //   context,
-    //   (obj) => Counter(obj.count + 1),
-    // );
+    final result = RS.set<Counter>(
+      context,
+      (obj) => Counter(obj.count + 1),
+    );
 
     // Mutable update (reuses same instance)
-    final result = context.dispatch<Counter>(
-      (obj) => obj.count += 1,
-    );
+    // final result = context.dispatch<Counter>(
+    //   (obj) => obj.count += 1,
+    // );
 
     print('increment result: $result / #code: ${result.hashCode}');
   }

@@ -13,6 +13,13 @@ class RS {
   /// Alias for [ReactiveState.get]
   static T get<T>(BuildContext context) => ReactiveState.get(context);
 
+  /// Alias for [ReactiveState.getReactive]
+  static ReactiveController<T> getReactiveFromRoot<T>() =>
+      ReactiveState.getRootInjectable<T>().stateSingleton;
+
+  /// Alias for [ReactiveState.get]
+  static T getFromRoot<T>() => ReactiveState.getRootInjectable<T>().singleton;
+
   /// Alias for [ReactiveState.set]
   static T set<T>(BuildContext context, [dynamic Function(T) call]) =>
       ReactiveState.set(context, call);
@@ -26,16 +33,23 @@ class ReactiveState {
   /// If the [subscribe] option is true, the widget is subscribed and will update on
   /// all changes whenever the [ReactiveController.setState] method is called.
   static ReactiveController<T> getReactive<T>(BuildContext context,
+          {bool subscribe = false}) =>
+      getInjectable<T>(context, subscribe: subscribe).stateSingleton;
+
+  static Injectable<T> getRootInjectable<T>() => _InheritedState
+      ._rootState._states
+      .firstWhere((injectable) => injectable is Injectable<T>) as Injectable<T>;
+
+  static Injectable<T> getInjectable<T>(BuildContext context,
       {bool subscribe = false}) {
-    final inject = Inject.staticOf<T>(context, subscribe);
-    return inject.injectable.stateSingleton;
+    return Inject.staticOf<T>(context, subscribe).injectable;
   }
 
   /// Provides a way to access a pre-registered reactive instance of type [T].
   /// [context] must be provided so the widget is subscribed and will update on
   /// all changes whenever the [ReactiveController.setState] method is called.
   static T get<T>(BuildContext context, [bool subscribe = true]) =>
-      Inject.staticOf<T>(context, subscribe).injectable.singleton;
+      getInjectable<T>(context, subscribe: subscribe).singleton;
 
   /// Provides a shortcut for updating state of type [T].
   /// This update can be mutable or immutable depending on if the setter [call] method
@@ -79,11 +93,13 @@ class InheritedState extends StatefulWidget {
 
 class _InheritedState extends State<InheritedState> {
   final _states = <Injectable>[];
+  static _InheritedState _rootState;
 
   @override
   void initState() {
     super.initState();
     _initStates(widget.states, _states);
+    _rootState ??= this;
   }
 
   static void _initStates(

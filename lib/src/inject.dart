@@ -21,7 +21,7 @@ class Inject<T> implements Injectable<T> {
   /// Registers a type to an instance function which is exposed as a singleton
   /// to its descendants.
   ///
-  /// The type can be registered as a reactive or immutable state object.
+  /// The type can be registered as a reactive state or service object.
   /// The [_creationFunction] is called lazily and the instance value
   /// is stored for later access.
   Inject(this._creationFunction);
@@ -47,16 +47,17 @@ class Inject<T> implements Injectable<T> {
   set singleton(T value) => _singleton = value;
 
   @override
-  ReactiveController<T> get stateSingleton => _stateSingleton ??= ReactiveController<T>(this);
+  ReactiveController<T> get stateSingleton =>
+      _stateSingleton ??= ReactiveController<T>(this);
 
   @override
   Widget inheritedInject(Widget child) {
     return ValueListenableBuilder<T>(
       valueListenable: _notifier,
       builder: (ctx, _, __) => InheritedInject<T>(
-          child: child,
-          injectable: this,
-        ),
+        child: child,
+        injectable: this,
+      ),
     );
   }
 
