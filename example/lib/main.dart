@@ -22,7 +22,7 @@ void registerDependencies() {
     ),
   );
   SL.register(() => ApiService(SL.get()));
-  SL.register(() => TestService());
+  SL.register(() => TestService(RS.getReactiveFromRoot()));
   SL.register(() => CounterService(SL.get()));
 }
 

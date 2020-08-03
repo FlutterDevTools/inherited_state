@@ -1,3 +1,6 @@
+## 0.3.1 - 2020-08-03
+* Expose `ReactiveController<T>` publicly. 
+
 ## 0.3.0 - 2020-08-02
 * Add `getFromRoot` and `getReactiveFromRoot` to allow getting root injected instances without providing context. 
 
