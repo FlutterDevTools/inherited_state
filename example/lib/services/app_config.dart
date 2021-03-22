@@ -1,6 +1,5 @@
-
 class AppConfig {
-  const AppConfig({this.appName, this.baseUrl});
+  const AppConfig({required this.appName, required this.baseUrl});
   final String appName;
   final String baseUrl;
 }

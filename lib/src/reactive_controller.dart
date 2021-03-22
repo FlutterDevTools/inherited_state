@@ -9,14 +9,13 @@ class ReactiveController<T> {
   final Injectable<T> _inject;
 
   T get state => _inject.singleton;
-  ValueListenable<T> get stateListener => _inject.notifier;
+  ValueListenable<T?> get stateListener => _inject.notifier;
 
-  void setState(dynamic Function(T) stateUpdateFn) {
-    final dynamic updateResult = stateUpdateFn(state);
+  void setState(dynamic Function(T)? stateUpdateFn) {
+    final dynamic updateResult = stateUpdateFn?.call(state);
     final newState = updateResult is T ? updateResult : state;
     if (newState != null) {
       InheritedState.replaceReactive(_inject, newState);
-      _inject.notifier.value = newState;
     }
   }
 }

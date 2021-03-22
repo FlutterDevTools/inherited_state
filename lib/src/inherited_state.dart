@@ -21,7 +21,7 @@ class RS {
   static T getFromRoot<T>() => ReactiveState.getRootInjectable<T>().singleton;
 
   /// Alias for [ReactiveState.set]
-  static T set<T>(BuildContext context, [dynamic Function(T) call]) =>
+  static T set<T>(BuildContext context, [dynamic Function(T)? call]) =>
       ReactiveState.set(context, call);
 }
 
@@ -36,13 +36,21 @@ class ReactiveState {
           {bool subscribe = false}) =>
       getInjectable<T>(context, subscribe: subscribe).stateSingleton;
 
-  static Injectable<T> getRootInjectable<T>() => _InheritedState
-      ._rootState._states
-      .firstWhere((injectable) => injectable is Injectable<T>) as Injectable<T>;
+  static Injectable<T> getRootInjectable<T>() {
+    final states = _InheritedState._rootState!._states;
+    final injectable = states.cast<Injectable<dynamic>?>().firstWhere(
+        (injectable) => injectable!.type == T,
+        orElse: () => null) as Injectable<T>?;
+    if (injectable == null)
+      throw Exception('${T.toString()} is not registered.');
+    return injectable;
+  }
 
   static Injectable<T> getInjectable<T>(BuildContext context,
       {bool subscribe = false}) {
-    return Inject.staticOf<T>(context, subscribe).injectable;
+    final inject = Inject.staticOf<T>(context, subscribe);
+    if (inject == null) throw Exception('${T.toString()} is not registered.');
+    return inject.injectable;
   }
 
   /// Provides a way to access a pre-registered reactive instance of type [T].
@@ -56,7 +64,7 @@ class ReactiveState {
   /// returns the same type as [T].
   ///
   /// This calls the underlying [ReactiveController.setState] method to update the state.
-  static T set<T>(BuildContext context, [dynamic Function(T) call]) {
+  static T set<T>(BuildContext context, [dynamic Function(T)? call]) {
     final value = RS.getReactive<T>(context);
     value.setState(call);
     return value.state;
@@ -72,12 +80,10 @@ class InheritedState extends StatefulWidget {
   /// [states] accepts a list of [Inject]s that essentially
   /// register an instance creation function to be used when a state type is requested.
   const InheritedState({
-    Key key,
-    @required this.states,
-    @required this.builder,
-  })  : assert(states != null),
-        assert(builder != null),
-        super(key: key);
+    Key? key,
+    required this.states,
+    required this.builder,
+  }) : super(key: key);
 
   final List<Injectable> states;
   final Widget Function(BuildContext) builder;
@@ -93,7 +99,7 @@ class InheritedState extends StatefulWidget {
 
 class _InheritedState extends State<InheritedState> {
   final _states = <Injectable>[];
-  static _InheritedState _rootState;
+  static _InheritedState? _rootState;
 
   @override
   void initState() {
@@ -104,9 +110,7 @@ class _InheritedState extends State<InheritedState> {
 
   static void _initStates(
       List<Injectable> widgetInjectables, List<Injectable> localInjectables) {
-    if (widgetInjectables != null) {
-      localInjectables.addAll(widgetInjectables);
-    }
+    localInjectables.addAll(widgetInjectables);
   }
 
   @override
@@ -141,5 +145,6 @@ class _InheritedState extends State<InheritedState> {
 extension BuildContextEventExtension on BuildContext {
   T on<T>() => ReactiveState.get<T>(this);
   T once<T>() => ReactiveState.get<T>(this, false);
-  T dispatch<T>([dynamic Function(T) call]) => ReactiveState.set<T>(this, call);
+  T dispatch<T>([dynamic Function(T)? call]) =>
+      ReactiveState.set<T>(this, call);
 }

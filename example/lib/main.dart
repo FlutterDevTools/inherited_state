@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return InheritedState(
         states: [
-          Inject<Counter>(() => Counter(0)),
+          Inject<Counter>(() => Counter(count: 0)),
         ],
         builder: (_) {
           // final appConfig = InheritedService.get<AppConfig>();
@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -56,7 +56,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final counterService = SL.get<CounterService>();
   final testService = SL.get<TestService>();
-  Future<int> initialCounterFuture;
+  late Future<int> initialCounterFuture;
 
   @override
   void initState() {
@@ -74,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // Immutable update (creates a new instance)
     final result = RS.set<Counter>(
       context,
-      (obj) => Counter(obj.count + 1),
+      (obj) => Counter(count: obj.count + 1),
     );
 
     // Mutable update (reuses same instance)
@@ -127,7 +127,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: _buildFutureWaiter(
         (isReady) {
-          print('floats $counter');
           return FloatingActionButton(
             backgroundColor: isReady ? null : Colors.grey,
             disabledElevation: 0,

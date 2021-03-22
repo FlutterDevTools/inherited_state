@@ -1,10 +1,10 @@
 name: inherited_state
 description: Simple and clean state management backed by InheritedWidget and DI backed by the service locator pattern.
 homepage: https://github.com/FlutterDevTools/inherited_state
-version: 0.3.1
+version: 1.0.0
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter:

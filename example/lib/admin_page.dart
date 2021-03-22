@@ -10,8 +10,9 @@ class AdminPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final counter = context.on<Counter>();
     final canReset = counter.count != 0;
-    final resetFn =
-        canReset ? () => context.dispatch<Counter>((_) => Counter(0)) : null;
+    final resetFn = canReset
+        ? () => context.dispatch<Counter>((_) => Counter(count: 0))
+        : null;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin'),

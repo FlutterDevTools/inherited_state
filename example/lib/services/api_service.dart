@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 
 import 'app_config.dart';
 
-
 class ApiService {
   const ApiService(this._appConfig);
 
@@ -17,7 +16,7 @@ class ApiService {
   }
 
   Future<T> get<T>(String relativeUrl) async {
-    final response = await http.get(getUrl(relativeUrl));
+    final response = await http.get(Uri.parse(getUrl(relativeUrl)));
     return json.decode(response.body) as T;
   }
 }

@@ -1,6 +1,6 @@
 class Counter {
-  Counter([this.count]);
-  int count = 0;
+  Counter({this.count = 0});
+  int count;
 
   @override
   String toString() {

@@ -7,9 +7,10 @@ import 'reactive_controller.dart';
 abstract class Injectable<T> {
   Widget inheritedInject(Widget child);
   String get name;
+  Type get type;
   T get singleton;
   set singleton(T value);
-  InjectNotifier<T> get notifier;
+  InjectNotifier<T?> get notifier;
   ReactiveController<T> get stateSingleton;
 
   void disposeSingleton();
@@ -33,18 +34,31 @@ class Inject<T> implements Injectable<T> {
 
   static String getName<T>() => '$T';
 
-  final InjectNotifier<T> _notifier = InjectNotifier<T>(null);
+  // ignore: null_check_always_fails
+  final InjectNotifier<T?> _notifier = InjectNotifier<T?>(null);
   @override
-  InjectNotifier<T> get notifier => _notifier;
-
-  T _singleton;
-
-  ReactiveController<T> _stateSingleton;
+  InjectNotifier<T?> get notifier => _notifier;
 
   @override
-  T get singleton => _singleton ??= _creationFunction();
+  Type get type => T;
+
+  T? _singleton;
+
+  ReactiveController<T>? _stateSingleton;
+
   @override
-  set singleton(T value) => _singleton = value;
+  T get singleton {
+    if (_singleton != null) return _singleton!;
+    singleton = _creationFunction();
+    return _singleton!;
+  }
+
+  @override
+  set singleton(T value) {
+    _singleton = value;
+    WidgetsBinding.instance
+        ?.addPostFrameCallback((_) => _notifier.value = value);
+  }
 
   @override
   ReactiveController<T> get stateSingleton =>
@@ -52,7 +66,7 @@ class Inject<T> implements Injectable<T> {
 
   @override
   Widget inheritedInject(Widget child) {
-    return ValueListenableBuilder<T>(
+    return ValueListenableBuilder<T?>(
       valueListenable: _notifier,
       builder: (ctx, _, __) => InheritedInject<T>(
         child: child,
@@ -61,14 +75,14 @@ class Inject<T> implements Injectable<T> {
     );
   }
 
-  static InheritedInject<T> staticOf<T>(BuildContext context,
+  static InheritedInject<T>? staticOf<T>(BuildContext context,
       [bool subscribe = false]) {
     if (subscribe) {
       return context.dependOnInheritedWidgetOfExactType<InheritedInject<T>>();
     } else {
       return context
           .getElementForInheritedWidgetOfExactType<InheritedInject<T>>()
-          .widget as InheritedInject<T>;
+          ?.widget as InheritedInject<T>;
     }
   }
 
