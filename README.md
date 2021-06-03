@@ -5,7 +5,7 @@ Simple scoped reactive state management (using [InheritedWidget]) and DI. Suppor
 # Quick Start
 *pubspec.yaml*
 ```yaml
-inherited_state: ^0.3.1
+inherited_state: ^2.0.0
 ```
 
 ## Setup State Management

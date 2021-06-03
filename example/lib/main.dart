@@ -10,6 +10,7 @@ import 'services/app_config.dart';
 import 'services/counter_service.dart';
 
 void main() {
+  ServiceLocator.config = const ServiceLocatorConfig(throwOnUnregisered: false);
   registerDependencies();
   runApp(MyApp());
 }
@@ -21,9 +22,9 @@ void registerDependencies() {
       baseUrl: 'https://reqres.in/api',
     ),
   );
-  SL.register(() => ApiService(SL.get()));
+  SL.register(() => ApiService(SL.get()!));
   SL.register(() => TestService(RS.getReactiveFromRoot()));
-  SL.register(() => CounterService(SL.get()));
+  SL.register(() => CounterService(SL.get()!));
 }
 
 class MyApp extends StatelessWidget {
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
         ],
         builder: (_) {
           // final appConfig = InheritedService.get<AppConfig>();
-          final appConfig = SL.get<AppConfig>();
+          final appConfig = SL.get<AppConfig>()!;
           return MaterialApp(
             title: appConfig.appName,
             home: MyHomePage(title: appConfig.appName),
@@ -54,8 +55,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final counterService = SL.get<CounterService>();
-  final testService = SL.get<TestService>();
+  final counterService = SL.get<CounterService>()!;
+  final testService = SL.get<TestService>()!;
   late Future<int> initialCounterFuture;
 
   @override
