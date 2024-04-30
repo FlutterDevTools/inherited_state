@@ -57,7 +57,7 @@ class Inject<T> implements Injectable<T> {
   set singleton(T value) {
     _singleton = value;
     WidgetsBinding.instance
-        ?.addPostFrameCallback((_) => _notifier.value = value);
+        .addPostFrameCallback((_) => _notifier.value = value);
   }
 
   @override
