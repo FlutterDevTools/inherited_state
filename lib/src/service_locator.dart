@@ -2,6 +2,7 @@
 class SL {
   /// Alias for [ServiceLocator.get]
   static T? get<T>() => ServiceLocator.get();
+  static List<Object> getAll() => ServiceLocator.getAll();
   static void register<T>(T Function() instance) =>
       ServiceLocator.register(instance);
   static void registerWithType(Type type, dynamic Function() instance) =>
@@ -9,7 +10,9 @@ class SL {
 }
 
 class ServiceLocatorConfig {
-  const ServiceLocatorConfig({this.throwOnUnregisered = false});
+  const ServiceLocatorConfig(
+      {this.throwOnUnregisered = false, this.defaultLazy = true});
+  final bool defaultLazy;
   final bool throwOnUnregisered;
 }
 
@@ -17,7 +20,7 @@ class ServiceLocatorConfig {
 /// [ServiceLocator] is used to access a service class instance of a given pre-registered type.
 /// This instance is not reactive and is useful for accessing objects like services, configs, etc.
 class ServiceLocator {
-  static var config = ServiceLocatorConfig();
+  static var config = const ServiceLocatorConfig();
   static final _serviceMap = <String, ServiceInject<dynamic>>{};
 
   static String getName<T>() => '$T';
@@ -35,14 +38,23 @@ class ServiceLocator {
     return instance;
   }
 
-  static void register<T>(T Function() instance) =>
-      _serviceMap[getName<T>()] = ServiceInject<T>(instance);
-  static void registerWithType(Type type, dynamic Function() instance) =>
-      _serviceMap[type.toString()] = ServiceInject<dynamic>(instance);
+  static List<Object> getAll() =>
+      _serviceMap.values.map((e) => e.singleton as Object).toList();
+
+  static void register<T>(T Function() instance, {bool? lazy}) =>
+      _serviceMap[getName<T>()] =
+          ServiceInject<T>(instance, lazy: lazy ?? config.defaultLazy);
+  static void registerWithType(Type type, dynamic Function() instance,
+          {bool? lazy}) =>
+      _serviceMap[type.toString()] =
+          ServiceInject<dynamic>(instance, lazy: lazy ?? config.defaultLazy);
 }
 
 class ServiceInject<T> {
-  ServiceInject(this.creationFunction);
+  ServiceInject(this.creationFunction, {this.lazy = true}) {
+    if (!lazy) _singleton = creationFunction();
+  }
+  final bool lazy;
   final T Function() creationFunction;
 
   T? _singleton;

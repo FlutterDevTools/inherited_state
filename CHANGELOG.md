@@ -1,3 +1,7 @@
+## 2.1.0 - 2024-04-30
+- Add ability to get all service locator registrations
+- lazy config option for registration and default for all usage
+
 ## 2.0.0 - 20201-03-21
 
 - Default get to just print message and allow nullable return type if the type is not registered. Allow configuration of the return type nullability using `ServiceLocator.config`.

@@ -10,7 +10,8 @@ import 'services/app_config.dart';
 import 'services/counter_service.dart';
 
 void main() {
-  ServiceLocator.config = const ServiceLocatorConfig(throwOnUnregisered: false);
+  ServiceLocator.config =
+      const ServiceLocatorConfig(throwOnUnregisered: false, defaultLazy: false);
   registerDependencies();
   runApp(MyApp());
 }
